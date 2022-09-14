@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
@@ -10,7 +11,6 @@ concurrency:
 
 jobs:
   bin:
-    if: github.repository == 'kolmafia/kolmafia'
     name: Build Binaries
     runs-on: ${{ matrix.os }}
     strategy:
@@ -22,11 +22,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Java 17
+      - name: Setup Java 18
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
-          java-version: "17"
+          java-version: "18"
           cache: "gradle"
 
       - name: Gradle Wrapper Validation
@@ -35,7 +35,7 @@ jobs:
       - name: Build
         env:
           ORG_GRADLE_PROJECT_commit: ${{ github.sha }}
-        run: ./gradlew --no-daemon jpackage
+        run: ./gradlew --no-daemon --stacktrace --debug jpackage
 
       - name: Upload binaries
         uses: actions/upload-artifact@v3
@@ -47,7 +47,6 @@ jobs:
             build/releases/*.dmg
 
   jar:
-    if: github.repository == 'kolmafia/kolmafia'
     name: Build Release
     runs-on: ubuntu-latest
 
@@ -57,11 +56,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Java 17
+      - name: Setup Java 18
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
-          java-version: "17"
+          java-version: "18"
           cache: "gradle"
 
       - name: Gradle Wrapper Validation
@@ -80,7 +79,6 @@ jobs:
 
   release:
     needs: [bin, jar]
-    if: github.repository == 'kolmafia/kolmafia'
     name: Publish Artifacts
     runs-on: ubuntu-latest
     steps:
